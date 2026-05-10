@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "aiogram>=3.27.0",
+    "aiohttp>=3.13.5",
     "anthropic>=0.97.0",
     "chromadb>=1.5.8",
     "mcp>=1.27.0",

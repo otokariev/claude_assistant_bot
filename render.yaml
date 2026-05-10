@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: claude-assistant-bot
+    runtime: python
+    buildCommand: pip install uv && uv sync
+    startCommand: uv run main.py
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: WEBHOOK_HOST
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.12.0
