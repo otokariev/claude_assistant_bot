@@ -24,7 +24,7 @@ WEB_SERVER_PORT = int(os.getenv("PORT", 10000))
 
 async def on_startup(bot: Bot):
     """Set webhook on startup."""
-    await bot.set_webhook(WEBHOOK_URL)
+    await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
     logger.info(f"Webhook set to {WEBHOOK_URL}")
 
 
