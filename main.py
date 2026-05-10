@@ -34,6 +34,11 @@ async def on_shutdown(bot: Bot):
     logger.info("Webhook deleted")
 
 
+async def health_check(request):
+    """Health check endpoint for UptimeRobot."""
+    return web.Response(text="OK")
+
+
 def main():
     """Start the bot with webhook."""
     bot = Bot(
@@ -49,6 +54,7 @@ def main():
     app = web.Application()
     SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
+    app.router.add_get("/health", health_check)
 
     web.run_app(app, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
 
