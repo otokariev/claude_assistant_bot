@@ -8,9 +8,6 @@ from claude.client import ask_claude_with_tools
 
 from mcp_module.mcp_client import run_mcp_agent
 
-from rag.vector_store import add_document, get_collection_count
-from rag.retrieval import answer_with_rag
-
 from workflows.chains import run_chain
 from workflows.parallel import run_parallel
 from workflows.routing import route_request
@@ -182,6 +179,7 @@ async def handle_mcp(message: Message):
 
 @router.message(Command("upload"))
 async def handle_upload(message: Message):
+    from rag.vector_store import add_document, get_collection_count
     """Handle /upload command - add text document to vector store."""
     user_text = message.text.replace("/upload", "").strip()
 
@@ -211,6 +209,7 @@ async def handle_upload(message: Message):
 
 @router.message(Command("ask_with_rag"))
 async def handle_ask_with_rag(message: Message):
+    from rag.retrieval import answer_with_rag
     """Handle /ask_with_rag command - answer question using RAG."""
     user_text = message.text.replace("/ask_with_rag", "").strip()
 
