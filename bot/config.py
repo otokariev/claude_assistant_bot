@@ -5,6 +5,7 @@ load_dotenv()
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+BOT_PASSWORD = os.getenv("BOT_PASSWORD", "mypassword")
 
 # Claude settings
 CLAUDE_HAIKU = "claude-haiku-4-5-20251001"  # Default cheap and fast model

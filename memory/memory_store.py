@@ -38,3 +38,16 @@ def clear_facts(user_id: int):
     memory = _load_memory()
     memory[str(user_id)] = []
     _save_memory(memory)
+
+    
+def is_authorized(user_id: int) -> bool:
+    """Check if user is authorized."""
+    memory = _load_memory()
+    return memory.get(f"auth_{user_id}", False)
+
+
+def authorize_user(user_id: int):
+    """Mark user as authorized."""
+    memory = _load_memory()
+    memory[f"auth_{user_id}"] = True
+    _save_memory(memory)

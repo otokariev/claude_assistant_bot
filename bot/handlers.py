@@ -26,6 +26,9 @@ from mcp_module.mcp_client_http import run_mcp_http_agent
 
 from bot.keyboard import get_main_keyboard
 
+from bot.config import BOT_PASSWORD
+from memory.memory_store import is_authorized, authorize_user
+
 router = Router()
 conversation_manager = ConversationManager()
 
@@ -38,14 +41,18 @@ Use HTML formatting: <b>bold</b>, <i>italic</i>, <code>code</code>. Never use ma
 @router.message(Command("start"))
 async def cmd_start(message: Message):
     """Handle /start command."""
-    await message.answer(
-        "Hello! I am your Claude assistant.\n\n"
-        "Commands:\n"
-        "/start - start\n"
-        "/help - help\n"
-        "/clear - clear conversation history",
-        reply_markup=get_main_keyboard()
-    )
+    user_id = message.from_user.id
+    if is_authorized(user_id):
+        await message.answer(
+            "Welcome back! I am your Claude assistant.\n\n"
+            "Commands:\n"
+            "/start - start\n"
+            "/help - help\n"
+            "/clear - clear conversation history",
+            reply_markup=get_main_keyboard()
+        )
+    else:
+        await message.answer("Hello! Please enter the password to access the bot:")
 
 
 @router.message(Command("help"))
@@ -408,22 +415,34 @@ async def handle_mcp_http(message: Message):
     await message.answer(response)
 
 
-@router.message(F.text)
-async def handle_message(message: Message):
-    """Handle regular text messages with long-term memory support."""
+@router.message(F.text & ~F.text.startswith("/"))
+async def handle_password(message: Message):
+    """Handle password input and regular messages."""
     user_id = message.from_user.id
-    user_text = message.text
 
-    # Extract and save facts from user message in background
-    extract_and_save_facts(user_id, user_text)
+    if not is_authorized(user_id):
+        if message.text == BOT_PASSWORD:
+            authorize_user(user_id)
+            await message.answer(
+                "✅ Access granted!\n\n"
+                "Hello! I am your Claude assistant.\n\n"
+                "Commands:\n"
+                "/start - start\n"
+                "/help - help\n"
+                "/clear - clear conversation history",
+                reply_markup=get_main_keyboard()
+            )
+        else:
+            await message.answer("❌ Wrong password. Please try again:")
+        return
 
-    # Add user message to conversation history
-    conversation_manager.add_message(user_id, "user", user_text)
+    # Authorized user - handle as regular message
+    extract_and_save_facts(user_id, message.text)
+    conversation_manager.add_message(user_id, "user", message.text)
     history = conversation_manager.get_history(user_id)
 
     await message.bot.send_chat_action(message.chat.id, "typing")
 
-    # Ask Claude with long-term memory injected
     response = ask_claude_with_memory(
         user_id=user_id,
         messages=history,
