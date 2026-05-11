@@ -22,11 +22,10 @@ WEB_SERVER_HOST = "0.0.0.0"
 WEB_SERVER_PORT = int(os.getenv("PORT", 10000))
 
 
-async def on_startup(bot: Bot):
+async def on_startup(app):
     """Set webhook on startup."""
-    bot = app["bot"]
     try:
-        await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
+        await app["bot"].set_webhook(WEBHOOK_URL, drop_pending_updates=True)
         logger.info(f"Webhook set to {WEBHOOK_URL}")
     except Exception as e:
         logger.error(f"Failed to set webhook: {e}")
