@@ -31,10 +31,10 @@ async def on_startup(bot: Bot):
         logger.error(f"Failed to set webhook: {e}")
 
 
-async def on_shutdown(bot: Bot):
-    """Delete webhook on shutdown."""
-    await bot.delete_webhook()
-    logger.info("Webhook deleted")
+# async def on_shutdown(bot: Bot):
+#     """Delete webhook on shutdown."""
+#     await bot.delete_webhook()
+#     logger.info("Webhook deleted")
 
 
 async def health_check(request):
@@ -52,7 +52,7 @@ def main():
     dp = Dispatcher()
     dp.include_router(router)
     dp.startup.register(on_startup)
-    dp.shutdown.register(on_shutdown)
+    # dp.shutdown.register(on_shutdown)
 
     app = web.Application()
     SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
