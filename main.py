@@ -24,6 +24,7 @@ WEB_SERVER_PORT = int(os.getenv("PORT", 10000))
 
 async def on_startup(bot: Bot):
     """Set webhook on startup."""
+    bot = app["bot"]
     try:
         await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
         logger.info(f"Webhook set to {WEBHOOK_URL}")
@@ -51,14 +52,14 @@ def main():
 
     dp = Dispatcher()
     dp.include_router(router)
-    dp.startup.register(on_startup)
     # dp.shutdown.register(on_shutdown)
 
     app = web.Application()
+    app["bot"] = bot
+    app.on_startup.append(on_startup)
     SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
     app.router.add_get("/health", health_check)
-
     web.run_app(app, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
 
 
