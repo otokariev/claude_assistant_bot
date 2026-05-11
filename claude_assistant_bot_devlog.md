@@ -1,60 +1,60 @@
 # Dev Log: claude_assistant_bot
 
-> Дневник разработки Telegram бота на базе Claude API.
-> Цель: применить все темы курса "Building with the Claude API" и создать конспект-проект.
+> Development diary of a Telegram bot powered by Claude API.
+> Goal: apply all topics from the "Building with the Claude API" course and create a reference project.
 
 ---
 
-## Как вести этот дневник
+## How to use this diary
 
-- После каждого нового шага добавляй запись с датой
-- Пиши кратко: что сделал, какие команды вводил, какие проблемы возникли и как решил
-- Если что-то не работало — записывай причину и решение. Это самое ценное
-- Не пиши весь код — только ключевые моменты и команды
+- After each new step, add an entry with the date
+- Write briefly: what you did, which commands you ran, what problems occurred and how you solved them
+- If something didn't work — write down the cause and the solution. That's the most valuable part
+- Don't write all the code — only key moments and commands
 
-**Структура записи:**
+**Entry structure:**
 ```
-### Шаг N — Название
-**Что сделал:** ...
-**Команды:** ...
-**Проблемы:** ...
-**Решение:** ...
-**Заметки:** ...
+### Step N — Title
+**What I did:** ...
+**Commands:** ...
+**Problems:** ...
+**Solution:** ...
+**Notes:** ...
 ```
 
 ---
 
-## Стек проекта
+## Tech stack
 
 - Python 3.12
-- aiogram 3 — Telegram бот
+- aiogram 3 — Telegram bot framework
 - anthropic — Claude API
-- python-dotenv — переменные окружения
-- uv — менеджер пакетов
-- Render — хостинг
-- GitHub — репозиторий
+- python-dotenv — environment variables
+- uv — package manager
+- Render — hosting
+- GitHub — repository
 
 ---
 
-## История разработки
+## Development history
 
-### Шаг 1 — Создание проекта в PyCharm
-**Что сделал:** Создал новый проект в PyCharm, удалил стандартное виртуальное окружение.
+### Step 1 — Project setup in PyCharm
+**What I did:** Created a new project in PyCharm, removed the default virtual environment.
 
-**Команды:**
+**Commands:**
 ```bash
 rm -rf .venv
 uv init
 ```
 
-**Заметки:** `uv init` автоматически создаёт `pyproject.toml`, `uv.lock` и `.gitignore` с `.venv` и `__pycache__`.
+**Notes:** `uv init` automatically creates `pyproject.toml`, `uv.lock` and `.gitignore` with `.venv` and `__pycache__`.
 
 ---
 
-### Шаг 2 — Настройка .gitignore
-**Что сделал:** Добавил в `.gitignore` дополнительные строки.
+### Step 2 — Configure .gitignore
+**What I did:** Added extra entries to `.gitignore`.
 
-**Содержимое `.gitignore`:**
+**Contents of `.gitignore`:**
 ```
 .venv
 __pycache__
@@ -62,26 +62,26 @@ __pycache__
 .idea
 ```
 
-**Заметки:** `.idea` — папка настроек PyCharm, не нужна в Git. `.env` — секретные ключи, никогда не пушить в репозиторий.
+**Notes:** `.idea` is the PyCharm settings folder — not needed in Git. `.env` contains secret keys — never push to repository.
 
 ---
 
-### Шаг 3 — Установка зависимостей
-**Что сделал:** Установил все нужные библиотеки через uv.
+### Step 3 — Install dependencies
+**What I did:** Installed all required libraries via uv.
 
-**Команда:**
+**Command:**
 ```bash
 uv add anthropic aiogram python-dotenv
 ```
 
-**Заметки:** uv автоматически обновляет `pyproject.toml` и `uv.lock`. Не нужен `requirements.txt`.
+**Notes:** uv automatically updates `pyproject.toml` and `uv.lock`. No `requirements.txt` needed.
 
 ---
 
-### Шаг 4 — Создание структуры папок
-**Что сделал:** Создал папки и файлы проекта.
+### Step 4 — Create project structure
+**What I did:** Created folders and files for the project.
 
-**Команды:**
+**Commands:**
 ```bash
 mkdir bot claude tools
 touch bot/__init__.py bot/handlers.py bot/config.py
@@ -90,48 +90,49 @@ touch tools/__init__.py
 touch main.py
 ```
 
-**Структура проекта:**
+**Project structure:**
 ```
 claude_assistant_bot/
-├── main.py              # точка входа
+├── main.py              # entry point
 ├── bot/
 │   ├── __init__.py
-│   ├── handlers.py      # обработчики команд Telegram
-│   └── config.py        # настройки и переменные окружения
+│   ├── handlers.py      # Telegram command handlers
+│   └── config.py        # settings and environment variables
 ├── claude/
 │   ├── __init__.py
-│   ├── client.py        # базовый Anthropic клиент
-│   └── conversation.py  # управление историей диалога
+│   ├── client.py        # base Anthropic client
+│   └── conversation.py  # conversation history manager
 ├── tools/
-│   └── __init__.py      # инструменты (добавим позже)
-├── .env                 # секретные ключи (не в Git!)
+│   └── __init__.py      # tools (added later)
+├── .env                 # secret keys (not in Git!)
 ├── .gitignore
 └── pyproject.toml
 ```
 
 ---
 
-### Шаг 5 — Файл .env
-**Что сделал:** Создал файл с секретными ключами.
+### Step 5 — .env file
+**What I did:** Created a file with secret keys.
 
-**Содержимое `.env`:**
+**Contents of `.env`:**
 ```
-ANTHROPIC_API_KEY=твой_ключ
-TELEGRAM_BOT_TOKEN=твой_токен
+ANTHROPIC_API_KEY=your_key
+TELEGRAM_BOT_TOKEN=your_token
 ```
 
-**Заметки:** Токен Telegram берётся у @BotFather. API ключ Anthropic — на console.anthropic.com.
+**Notes:** Telegram token is obtained from @BotFather. Anthropic API key — at console.anthropic.com.
 
 ---
 
-### Шаг 6 — bot/config.py
-**Что сделал:** Настройки проекта — модели, лимиты, переменные окружения.
+### Step 6 — bot/config.py
+**What I did:** Project settings — models, limits, environment variables.
 
-**Ключевые моменты:**
-- `load_dotenv()` загружает переменные из `.env`
-- Две модели: Haiku (дешёвая, быстрая) и Sonnet (для сложных задач)
-- `MAX_HISTORY = 20` — максимум сообщений в истории диалога (10 пар вопрос-ответ)
-- `TEMPERATURE = 1` — стандартное значение для Claude
+**Key points:**
+- `load_dotenv()` loads variables from `.env`
+- Two models: Haiku (cheap, fast) and Sonnet (for complex tasks)
+- `MAX_HISTORY = 20` — max messages in conversation history (10 question-answer pairs)
+- `TEMPERATURE = 1` — standard value for Claude
+- `MULTILINGUAL_INSTRUCTION` — constant to make Claude respond in the user's language
 
 ```python
 CLAUDE_HAIKU = "claude-haiku-4-5-20251001"
@@ -139,357 +140,579 @@ CLAUDE_SONNET = "claude-sonnet-4-6"
 MAX_TOKENS = 1024
 TEMPERATURE = 1
 MAX_HISTORY = 20
+MULTILINGUAL_INSTRUCTION = "Always respond in the same language as the user's message."
 ```
 
 ---
 
-### Шаг 7 — claude/client.py
-**Что сделал:** Базовый клиент для запросов к Claude API.
+### Step 7 — claude/client.py
+**What I did:** Base client for Claude API requests.
 
-**Ключевые моменты:**
-- `anthropic.Anthropic(api_key=...)` — создание клиента
-- Функция `ask_claude(messages, system, model)` — универсальный запрос
-- `messages` — список в формате `[{"role": "user", "content": "..."}]`
-- `system` — системный промпт (необязательный)
-- Ответ: `response.content[0].text`
-
----
-
-### Шаг 8 — claude/conversation.py
-**Что сделал:** Класс для управления историей диалога каждого пользователя.
-
-**Ключевые моменты:**
-- `ConversationManager` — класс с словарём `{user_id: [messages]}`
-- Claude не помнит предыдущие сообщения сам — история передаётся каждый раз заново
-- При превышении `MAX_HISTORY` старые сообщения обрезаются
-- Методы: `add_message()`, `get_history()`, `clear_history()`
-
-**Почему класс, а не функции:** состояние (histories) должно жить всё время работы бота.
+**Key points:**
+- `anthropic.Anthropic(api_key=...)` — creates the client
+- Function `ask_claude(messages, system, model)` — universal request
+- `messages` — list in format `[{"role": "user", "content": "..."}]`
+- `system` — system prompt (optional)
+- Response: `response.content[0].text`
 
 ---
 
-### Шаг 9 — bot/handlers.py
-**Что сделал:** Обработчики команд и сообщений Telegram на aiogram 3.
+### Step 8 — claude/conversation.py
+**What I did:** Class for managing conversation history per user.
 
-**Ключевые моменты:**
-- `Router` — регистратор обработчиков (в aiogram 3 вместо глобального диспетчера)
-- `@router.message(Command("start"))` — декоратор для команды
-- `F.text` — фильтр для текстовых сообщений
-- `async/await` — все обработчики асинхронные
-- `send_chat_action("typing")` — индикатор печати пока Claude думает
-- Системный промпт определяет поведение бота
+**Key points:**
+- `ConversationManager` — class with dict `{user_id: [messages]}`
+- Claude doesn't remember previous messages itself — history is sent every time
+- When `MAX_HISTORY` is exceeded, old messages are trimmed
+- Methods: `add_message()`, `get_history()`, `clear_history()`
 
-**Порядок обработки сообщения:**
-1. Получить user_id и текст
-2. Добавить в историю
-3. Отправить "typing..."
-4. Запросить Claude с историей
-5. Добавить ответ в историю
-6. Отправить ответ пользователю
+**Why a class and not functions:** state (histories) must live for the entire bot lifetime.
 
 ---
 
-### Шаг 10 — main.py
-**Что сделал:** Точка входа — запуск бота.
+### Step 9 — bot/handlers.py
+**What I did:** Telegram command and message handlers using aiogram 3.
 
-**Ключевые моменты:**
-- `Bot(token=..., default=DefaultBotProperties(parse_mode=ParseMode.HTML))` — HTML разметка в сообщениях
-- `Dispatcher` — главный обработчик событий
-- `dp.include_router(router)` — подключение роутера из handlers.py
-- `delete_webhook(drop_pending_updates=True)` — сброс вебхука перед polling
-- `start_polling(bot)` — бот постоянно опрашивает Telegram
-- `asyncio.run(main())` — запуск асинхронного кода
+**Key points:**
+- `Router` — handler registrar (replaces global dispatcher in aiogram 3)
+- `@router.message(Command("start"))` — decorator for a command
+- `F.text` — filter for text messages
+- `async/await` — all handlers are asynchronous
+- `send_chat_action("typing")` — typing indicator while Claude is thinking
+- System prompt defines bot behavior
+
+**Message processing order:**
+1. Get user_id and text
+2. Add to history
+3. Send "typing..."
+4. Request Claude with history
+5. Add response to history
+6. Send response to user
 
 ---
 
-### Шаг 11 — Первый запуск
-**Команда:**
+### Step 10 — main.py
+**What I did:** Entry point — bot startup.
+
+**Key points:**
+- `Bot(token=..., default=DefaultBotProperties(parse_mode=ParseMode.HTML))` — HTML markup in messages
+- `Dispatcher` — main event handler
+- `dp.include_router(router)` — connects router from handlers.py
+- `delete_webhook(drop_pending_updates=True)` — resets webhook before polling
+- `start_polling(bot)` — bot constantly polls Telegram
+- `asyncio.run(main())` — starts async code
+
+---
+
+### Step 11 — First run
+**Command:**
 ```bash
 uv run main.py
 ```
 
-**Результат:**
+**Result:**
 ```
 INFO:__main__:Bot started
 INFO:aiogram.dispatcher:Start polling
-INFO:aiogram.dispatcher:Run polling for bot @... 
+INFO:aiogram.dispatcher:Run polling for bot @...
 ```
 
-**Проверка:** бот ответил на `/start` и на текстовое сообщение через Claude. ✅
+**Check:** bot responded to `/start` and to a text message via Claude. ✅
 
 ---
 
-### Шаг 12 — claude/streaming.py
-**Что сделал:** Стриминг ответов от Claude — текст приходит кусками по мере генерации.
+### Step 12 — claude/streaming.py
+**What I did:** Streaming responses from Claude — text arrives in chunks as it generates.
 
-**Ключевые моменты:**
-- `stream_claude` — генератор (использует `yield`)
-- `client.messages.stream()` — специальный метод SDK для стриминга
-- `stream.text_stream` — итератор который выдаёт текст по кускам
-- В `handlers.py` добавлена команда `/stream`
-- Сообщение редактируется каждые 10 чанков — защита от rate limit Telegram
-- На Haiku стриминг почти незаметен — модель слишком быстрая. Заметнее на Sonnet и длинных ответах.
-
----
-
-### Шаг 13 — tools/notes_tool.py
-**Что сделал:** Инструмент для работы с заметками — сохранение в JSON файл.
-
-**Ключевые моменты:**
-- Заметки хранятся в `notes.json` в корне проекта
-- `_load_notes()` / `_save_notes()` — приватные функции (префикс `_`) для работы с файлом
-- 4 публичных функции: `add_note()`, `get_note()`, `list_notes()`, `delete_note()`
-- `"\n".join(f"- {title}" for title in notes.keys())` — генератор + join для форматирования списка в строку
+**Key points:**
+- `stream_claude` — generator (uses `yield`)
+- `client.messages.stream()` — special SDK method for streaming
+- `stream.text_stream` — iterator that yields text in chunks
+- `/stream` command added to `handlers.py`
+- Message is edited every 10 chunks — protection against Telegram rate limit
+- On Haiku streaming is barely noticeable — model is too fast. More visible on Sonnet and long responses.
 
 ---
 
-### Шаг 14 — claude/tools.py + tool use
-**Что сделал:** Подключил инструменты к Claude через tool use API.
+### Step 13 — tools/notes_tool.py
+**What I did:** Tool for working with notes — saving to JSON file.
 
-**Ключевые моменты:**
-- `NOTES_TOOLS` — список описаний инструментов в формате JSON Schema
-- Каждый инструмент имеет `name`, `description`, `input_schema`
-- `process_tool_call()` — диспетчер, вызывает нужную функцию по имени
-- В `claude/client.py` добавлена функция `ask_claude_with_tools()`
-- **Agentic loop** — цикл `while True` пока Claude вызывает инструменты:
-  1. Отправить запрос с инструментами
-  2. Если `stop_reason == "end_turn"` — вернуть ответ
-  3. Если `stop_reason == "tool_use"` — выполнить инструмент, добавить результат, повторить
-- В `handlers.py` добавлена команда `/note`
-- Также добавлена функция `edit_note()` — редактирование заметки
+**Key points:**
+- Notes are stored in `notes.json` in the project root
+- `_load_notes()` / `_save_notes()` — private functions (prefix `_`) for file operations
+- 5 public functions: `add_note()`, `get_note()`, `list_notes()`, `delete_note()`, `edit_note()`
+- `"\n".join(f"- {title}" for title in notes.keys())` — generator + join to format list as string
+- Absolute path used to avoid path conflicts when MCP server runs as subprocess:
+```python
+NOTES_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "notes.json")
+```
 
 ---
 
-### Шаг 15 — mcp_module/mcp_server.py + mcp_client.py
-**Что сделал:** MCP сервер с инструментами и клиент для подключения к нему.
+### Step 14 — claude/tools.py + tool use
+**What I did:** Connected tools to Claude via tool use API.
 
-**Важно:** Папку назвал `mcp_module` (не `mcp`) — иначе конфликт с библиотекой `mcp`.
+**Key points:**
+- `NOTES_TOOLS` — list of tool descriptions in JSON Schema format
+- Each tool has `name`, `description`, `input_schema`
+- `process_tool_call()` — dispatcher, calls the right function by name
+- `ask_claude_with_tools()` added to `claude/client.py`
+- **Agentic loop** — `while True` loop while Claude calls tools:
+  1. Send request with tools
+  2. If `stop_reason == "end_turn"` — return response
+  3. If `stop_reason == "tool_use"` — execute tool, add result, repeat
+- `/note` command added to `handlers.py`
 
-**Проблема:** При запуске сервер не видел модуль `tools`. 
-**Решение:** Добавить путь к проекту в начало `mcp_server.py`:
+**Important:** Tool description affects Claude's behavior. If Claude uses the wrong tool, make the description more explicit:
+```python
+"description": "Get a list of ALL saved notes. Always use this tool when user asks to show, list or view all notes."
+```
+
+---
+
+### Step 15 — mcp_module/mcp_server.py + mcp_client.py
+**What I did:** MCP server with tools and client for connecting to it.
+
+**Important:** Folder named `mcp_module` (not `mcp`) — otherwise conflict with the `mcp` library.
+
+**Problem:** Server couldn't find the `tools` module when launched as a subprocess.
+**Solution:** Add project path to the beginning of `mcp_server.py`:
 ```python
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ```
 
-**Ключевые моменты MCP сервера:**
-- `@mcp.tool()` — инструменты для Claude
-- `@mcp.resource()` — данные доступные по URI (`notes://all`)
-- `@mcp.prompt()` — шаблоны промптов
+**Key points about MCP server:**
+- `@mcp.tool()` — tools for Claude
+- `@mcp.resource()` — data accessible by URI (`notes://all`)
+- `@mcp.prompt()` — prompt templates
 
-**Ключевые моменты MCP клиента:**
-- `StdioServerParameters` — запускает сервер как отдельный процесс
-- `session.list_tools()` — получает список инструментов с сервера динамически
-- `session.call_tool()` — вызывает инструмент на сервере
-- Тот же agentic loop, но инструменты выполняются на отдельном процессе
+**Key points about MCP client:**
+- `StdioServerParameters` — launches server as a separate process
+- `session.list_tools()` — gets list of tools from server dynamically
+- `session.call_tool()` — calls a tool on the server
+- Same agentic loop, but tools execute on a separate process
 
-**Разница `/note` vs `/mcp`:**
-- `/note` — монолит, инструменты вызываются напрямую
-- `/mcp` — MCP протокол, инструменты на отдельном процессе, можно подключить к любому MCP клиенту
+**Difference `/note` vs `/mcp`:**
+- `/note` — monolith, tools called directly
+- `/mcp` — MCP protocol, tools on separate process, can connect to any MCP client
 
-**Установка:** `uv add mcp`
+**Installation:** `uv add mcp`
 
 ---
 
-### Шаг 16 — RAG (rag/)
-**Что сделал:** RAG пайплайн — ответы на вопросы по загруженным документам.
+### Step 16 — RAG (rag/)
+**What I did:** RAG pipeline — answers to questions based on uploaded documents.
 
-**Команда установки:**
+**Installation:**
 ```bash
 uv add chromadb sentence-transformers
 ```
 
-**Файлы:**
-- `rag/embeddings.py` — создание векторов через `sentence-transformers` (модель `all-MiniLM-L6-v2`)
-- `rag/vector_store.py` — хранение и поиск в ChromaDB
-- `rag/retrieval.py` — RAG пайплайн
+**Files:**
+- `rag/embeddings.py` — vector generation via `sentence-transformers` (model `all-MiniLM-L6-v2`)
+- `rag/vector_store.py` — storage and search in ChromaDB
+- `rag/retrieval.py` — RAG pipeline
 
-**Как работает RAG:**
-1. `/upload текст` — текст превращается в вектор и сохраняется в ChromaDB
-2. `/ask_with_rag вопрос` — вопрос превращается в вектор, ищем похожие документы
-3. Найденные документы передаются Claude как контекст
-4. Claude отвечает только на основе контекста
+**How RAG works:**
+1. `/upload text` — text is converted to a vector and saved in ChromaDB
+2. `/ask_with_rag question` — question is converted to vector, similar documents are found
+3. Found documents are passed to Claude as context
+4. Claude answers based only on the context
 
-**Заметки:**
-- Команда `/ask` переименована в `/ask_with_rag` для ясности
-- При первом запуске `sentence-transformers` скачивает модель — занимает время
-- ChromaDB сохраняет данные в папку `./chroma_db`
-- Для ответов по документам используется `CLAUDE_SONNET` (точнее чем Haiku)
-
----
-
-### Шаг 17 — Агентские workflows (workflows/)
-**Что сделал:** Три типа агентских цепочек.
-
-**Файлы:**
-- `workflows/chains.py` — sequential chain (перевод → суммаризация → форматирование)
-- `workflows/parallel.py` — параллельный анализ текста с трёх сторон одновременно
-- `workflows/routing.py` — автоматический роутинг запроса к нужному обработчику
-
-**Команды бота:** `/chain`, `/parallel`, `/route`
-
-**Ключевые моменты:**
-- **Chain** — вывод одного шага становится входом следующего
-- **Parallel** — `asyncio.gather()` + `loop.run_in_executor()` для параллельных запросов к Claude
-- **Routing** — Claude сначала классифицирует запрос (QUESTION/TRANSLATION/SUMMARY/CODE), потом отвечает с нужным системным промптом
+**Notes:**
+- Command `/ask` renamed to `/ask_with_rag` for clarity
+- On first run `sentence-transformers` downloads the model — takes time
+- ChromaDB saves data to `./chroma_db` folder
+- `CLAUDE_SONNET` used for document answers (more accurate than Haiku)
+- RAG imports moved to lazy imports inside handler functions to speed up server startup
 
 ---
 
-### Шаг 18 — Structured outputs (claude/structured.py)
-**Что сделал:** Получение структурированных JSON ответов от Claude.
+### Step 17 — Agentic workflows (workflows/)
+**What I did:** Three types of agentic chains.
 
-**Команды бота:** `/sentiment`, `/tasks`
+**Files:**
+- `workflows/chains.py` — sequential chain (translate → summarize → format as bullet points)
+- `workflows/parallel.py` — parallel text analysis from three angles simultaneously
+- `workflows/routing.py` — automatic request routing to the right handler
 
-**Ключевые моменты:**
-- `get_structured_response()` — просит Claude вернуть строго JSON по схеме
-- Очищает ответ от markdown тройных кавычек перед `json.loads()`
-- `analyze_sentiment()` — анализ тональности текста
-- `extract_tasks()` — извлечение задач с приоритетами из текста
-- В handlers используется явный `parse_mode="HTML"` — так форматирование работает надёжнее
+**Bot commands:** `/chain`, `/parallel`, `/route`
+
+**Key points:**
+- **Chain** — output of one step becomes input of the next
+- **Parallel** — `asyncio.gather()` + `loop.run_in_executor()` for parallel Claude requests
+- **Routing** — Claude first classifies the request (QUESTION/TRANSLATION/SUMMARY/CODE), then responds with the right system prompt
 
 ---
 
-### Шаг 19 — Тесты и эвалы (evals/)
-**Что сделал:** Тестирование качества и скорости ответов Claude.
+### Step 18 — Structured outputs (claude/structured.py)
+**What I did:** Getting structured JSON responses from Claude.
 
-**Файлы:**
-- `evals/test_prompts.py` — Claude оценивает сам себя по критериям (LLM-as-a-judge)
-- `evals/benchmarks.py` — замер времени ответа Haiku vs Sonnet
+**Bot commands:** `/sentiment`, `/tasks`
 
-**Команды бота:** `/test`, `/benchmark`
+**Key points:**
+- `get_structured_response()` — asks Claude to return strictly JSON by schema
+- Cleans response from markdown triple backticks before `json.loads()`
+- `analyze_sentiment()` — text sentiment analysis
+- `extract_tasks()` — extracting tasks with priorities from text
+- Explicit `parse_mode="HTML"` used in handlers — more reliable formatting
 
-**Результаты benchmark:**
+---
+
+### Step 19 — Tests and evals (evals/)
+**What I did:** Testing quality and speed of Claude responses.
+
+**Files:**
+- `evals/test_prompts.py` — Claude evaluates itself by criteria (LLM-as-a-judge)
+- `evals/benchmarks.py` — response time measurement Haiku vs Sonnet
+
+**Bot commands:** `/test`, `/benchmark`
+
+**Benchmark results:**
 - Haiku: ~1.09s avg
-- Sonnet: ~2.26s avg (в 2 раза медленнее но точнее)
+- Sonnet: ~2.26s avg (2x slower but more accurate)
 
-**Разница между файлами:**
-- `test_prompts.py` — проверяет **качество** (точность, краткость, правильность)
-- `benchmarks.py` — проверяет **скорость** (время ответа, стабильность)
-
----
-
-### Шаг 20 — Модуль долгосрочной памяти (memory/)
-**Что сделал:** Долгосрочная память — сохранение важных фактов о пользователе между сессиями.
-
-**Файлы:**
-- `memory/memory_store.py` — хранение фактов в `memory.json`
-- `memory/memory_manager.py` — извлечение фактов из сообщений и инжекция в системный промпт
-
-**Команды бота:** `/memory`, `/forget`
-
-**Ключевые моменты:**
-- `extract_and_save_facts()` — Claude анализирует каждое сообщение и извлекает важные факты (имя, профессия, интересы)
-- Факты сохраняются в `memory.json` по `user_id`
-- `build_memory_prompt()` — формирует строку с фактами для системного промпта
-- `ask_claude_with_memory()` — обычный запрос но с памятью в системном промпте
-- `handle_message` обновлён — теперь использует память
+**Difference between files:**
+- `test_prompts.py` — checks **quality** (accuracy, conciseness, correctness)
+- `benchmarks.py` — checks **speed** (response time, stability)
 
 ---
 
-### Шаг 21 — MCP Advanced: Sampling
-**Что сделал:** Сервер делает запрос к Claude через клиента — демонстрация sampling.
+### Step 20 — Long-term memory module (memory/)
+**What I did:** Long-term memory — saving important facts about the user between sessions.
 
-**Команда бота:** `/summarize_note`
+**Files:**
+- `memory/memory_store.py` — storing facts in `memory.json`
+- `memory/memory_manager.py` — extracting facts from messages and injecting into system prompt
 
-**Ключевые моменты:**
-- Sampling — сервер просит клиента сгенерировать текст через Claude
-- `ctx.session.create_message()` — низкоуровневый вызов sampling
-- `Context` инжектируется в функцию как параметр — официальный способ FastMCP
-- `system_prompt` передаётся в sampling запрос
-- Клиент должен поддерживать sampling — нужен `sampling_callback` в `ClientSession`
+**Bot commands:** `/memory`, `/forget`
 
-**Проблема мультиязычности в sampling:**
-- `system_prompt` и инструкции языка игнорируются в sampling
-- Решение — передавать язык как явный параметр инструмента:
+**Key points:**
+- `extract_and_save_facts()` — Claude analyzes each message and extracts important facts (name, profession, interests)
+- Facts saved in `memory.json` by `user_id`
+- `build_memory_prompt()` — builds a string with facts for the system prompt
+- `ask_claude_with_memory()` — regular request but with memory in system prompt
+- `handle_message` updated — now uses memory
+
+---
+
+### Step 21 — MCP Advanced: Sampling
+**What I did:** Server makes a request to Claude via the client — demonstrates sampling.
+
+**Bot command:** `/summarize_note`
+
+**Key points:**
+- Sampling — server asks client to generate text via Claude
+- `ctx.session.create_message()` — low-level sampling call
+- `Context` is injected into the function as a parameter — official FastMCP way
+- `system_prompt` is passed in the sampling request
+- Client must support sampling — `sampling_callback` needed in `ClientSession`
+
+**Multilingual problem in sampling:**
+- `system_prompt` and language instructions are ignored in sampling
+- Solution — pass language as an explicit tool parameter:
 ```python
 async def tool_summarize_note_with_sampling(title: str, language: str, ctx: Context)
 ```
-Claude сам определяет язык из контекста и передаёт его в инструмент.
+Claude determines the language from context and passes it to the tool.
 
 ---
 
-### Шаг 22 — MCP Advanced: Log and progress notifications
-**Что сделал:** Сервер отправляет уведомления о прогрессе клиенту.
+### Step 22 — MCP Advanced: Log and progress notifications
+**What I did:** Server sends progress notifications to the client.
 
-**Команда бота:** `/process_notes`
+**Bot command:** `/process_notes`
 
-**Ключевые моменты:**
-- `ctx.info()` — отправить лог сообщение
-- `ctx.report_progress(current, total)` — отправить прогресс
-- Notifications видны только в логах сервера — не в Telegram
-- Это инструмент для разработчика, не для конечного пользователя
-
----
-
-### Шаг 23 — MCP Advanced: Roots
-**Что сделал:** Клиент сообщает серверу к каким директориям он имеет доступ.
-
-**Команда бота:** `/roots`
-
-**Ключевые моменты:**
-- Roots — список разрешённых директорий, которые клиент передаёт серверу
-- В mcp 1.27.0 roots передаются через `list_roots_callback` в `ClientSession`
-- Callback должен возвращать `ListRootsResult`, не просто список
-- Сервер запрашивает roots через `ctx.session.list_roots()`
-
-**Проблема:** В старых версиях `ClientSession` принимал `roots` как параметр — в 1.27.0 это изменилось на callback.
+**Key points:**
+- `ctx.info()` — send log message
+- `ctx.report_progress(current, total)` — send progress
+- Notifications are visible only in server logs — not in Telegram
+- This is a developer tool, not for end users
 
 ---
 
-### Шаг 24 — MCP Advanced: StreamableHTTP transport
-**Что сделал:** HTTP сервер для продакшена вместо STDIO.
+### Step 23 — MCP Advanced: Roots
+**What I did:** Client tells the server which directories it has access to.
 
-**Файлы:**
-- `mcp_module/mcp_server_http.py` — HTTP сервер с `stateless_http=True, json_response=True`
-- `mcp_module/mcp_client_http.py` — HTTP клиент
+**Bot command:** `/roots`
 
-**Команда бота:** `/mcp_http`
+**Key points:**
+- Roots — list of allowed directories that client passes to server
+- In mcp 1.27.0 roots are passed via `list_roots_callback` in `ClientSession`
+- Callback must return `ListRootsResult`, not just a list
+- Server requests roots via `ctx.session.list_roots()`
 
-**Установка:**
+**Problem:** In older versions `ClientSession` accepted `roots` as a parameter — in 1.27.0 this changed to a callback.
+
+---
+
+### Step 24 — MCP Advanced: StreamableHTTP transport
+**What I did:** HTTP server for production instead of STDIO.
+
+**Files:**
+- `mcp_module/mcp_server_http.py` — HTTP server with `stateless_http=True, json_response=True`
+- `mcp_module/mcp_client_http.py` — HTTP client
+
+**Bot command:** `/mcp_http`
+
+**Installation:**
 ```bash
 uv add uvicorn
 ```
 
-**Запуск HTTP сервера:**
+**Start HTTP server:**
 ```bash
 uv run python mcp_module/mcp_server_http.py
 ```
 
-**Ключевые моменты:**
-- `stateless_http=True` — нет состояния между запросами, подходит для serverless
-- `json_response=True` — ответы в JSON вместо SSE
-- `streamable_http_client` (не `streamablehttp_client`) — правильное название в mcp 1.27.0
-- STDIO — для локальной разработки. HTTP — для продакшена
-- На Render: бот и MCP HTTP сервер деплоятся как два отдельных сервиса
+**Key points:**
+- `stateless_http=True` — no state between requests, suitable for serverless
+- `json_response=True` — responses in JSON instead of SSE
+- `streamable_http_client` (not `streamablehttp_client`) — correct name in mcp 1.27.0
+- STDIO — for local development. HTTP — for production
+- On Render: bot and MCP HTTP server deploy as two separate services
 
 ---
 
-## Все шаги проекта
+### Step 25 — Keyboard with buttons for all commands
+**What I did:** Created a reply keyboard with all bot commands for easier navigation.
 
-- [x] Создание проекта в PyCharm + uv init
-- [x] Настройка .gitignore
-- [x] Установка зависимостей
-- [x] Создание структуры папок
-- [x] Файл .env
-- [x] bot/config.py
-- [x] claude/client.py
-- [x] claude/conversation.py
-- [x] bot/handlers.py
-- [x] main.py — точка входа
-- [x] Первый запуск
-- [x] Streaming — claude/streaming.py
-- [x] Tool use — tools/notes_tool.py
-- [x] Tool use — claude/tools.py + ask_claude_with_tools()
-- [x] MCP сервер — mcp_module/mcp_server.py + mcp_client.py
-- [x] RAG — rag/embeddings.py + vector_store.py + retrieval.py
-- [x] Агентские workflows — chains, parallel, routing
-- [x] Structured outputs — claude/structured.py
-- [x] Тесты и эвалы — evals/test_prompts.py + benchmarks.py
-- [x] Модуль долгосрочной памяти (memory)
-- [x] MCP Advanced — sampling
-- [x] MCP Advanced — log and progress notifications
-- [x] MCP Advanced — roots
-- [x] MCP Advanced — StreamableHTTP transport
-- [ ] Клавиатура с кнопками для всех команд
-- [ ] Исправить HTML форматирование в обычных сообщениях
-- [ ] Деплой на Render + GitHub (бот + MCP HTTP сервер как отдельный сервис)
+**File:** `bot/keyboard.py`
+
+**Key points:**
+- `ReplyKeyboardMarkup` — persistent keyboard shown below the message input
+- `KeyboardButton` — each button sends the command text when tapped
+- `resize_keyboard=True` — keyboard adapts to screen size
+- `input_field_placeholder` — hint text in the message input field
+- Buttons arranged in 2 per row for compact display
+- `/start` button removed — Telegram shows it automatically on first open
+
+**How to connect:**
+- Import `get_main_keyboard` in `handlers.py`
+- Pass `reply_markup=get_main_keyboard()` to `cmd_start`
+- Keyboard appears after user sends `/start`
+
+---
+
+### Step 26 — Fix HTML formatting in regular messages
+**What I did:** Made Claude respond with HTML formatting instead of Markdown.
+
+**Problem:** `ParseMode.HTML` was set in `main.py`, but Claude was returning Markdown (`**bold**`, `*italic*`). Telegram was displaying raw asterisks instead of formatted text.
+
+**Solution:**
+- Added HTML formatting instruction to `SYSTEM_PROMPT` in `handlers.py`:
+```python
+SYSTEM_PROMPT = f"""You are a helpful assistant in Telegram.
+Answer concisely and clearly.
+Use HTML formatting: <b>bold</b>, <i>italic</i>, <code>code</code>. Never use markdown.
+{MULTILINGUAL_INSTRUCTION}"""
+```
+- Added same instruction to system prompt in `handle_note`
+- For handlers that need formatting, explicit `parse_mode="HTML"` passed:
+```python
+await message.answer(response, parse_mode="HTML")
+```
+
+**Notes:**
+- `ParseMode.HTML` is more reliable than `MARKDOWN_V2` — no need to escape special characters
+- Claude sometimes ignores formatting instructions — explicit `parse_mode` in each handler is the safest approach
+
+---
+
+### Step 27 — GitHub
+**What I did:** Configured git and created a GitHub repository.
+
+**Commands:**
+```bash
+git config --global user.name "name"
+git config --global user.email "email"
+sudo dnf install gh
+gh auth login
+```
+
+**Added to `.gitignore`:**
+```
+chroma_db/
+notes.json
+memory.json
+```
+
+**Create repository and first push:**
+```bash
+git add .
+git commit -m "Initial commit: Claude Assistant Bot"
+gh repo create claude_assistant_bot --public --source=. --remote=origin --push
+```
+
+**Notes:**
+- `gh` — GitHub CLI, official utility for working with GitHub from the terminal
+- `--public` — public repository, replace with `--private` for private
+- `38 files changed, 5467 insertions` — most of it is `uv.lock`, actual code ~500-800 lines
+
+---
+
+### Step 28 — Prepare for deployment: switch to webhook
+**What I did:** Replaced polling with webhook in `main.py` for Render deployment.
+
+**Installation:**
+```bash
+uv add aiohttp
+```
+
+**Key points:**
+- Polling on free Render sleeps after 15 minutes — bot stops responding
+- Webhook — Telegram sends updates to URL itself, service doesn't sleep
+- `WEBHOOK_HOST` — Render service URL (environment variable)
+- `PORT` — port provided by Render (env variable, default 10000)
+- `web.run_app()` replaces `asyncio.run()` — creates event loop itself
+- `on_startup` — sets webhook on startup
+
+**Environment variables for Render:**
+```
+TELEGRAM_BOT_TOKEN=...
+ANTHROPIC_API_KEY=...
+WEBHOOK_HOST=https://your-service.onrender.com
+BOT_PASSWORD=...
+```
+
+---
+
+### Step 29 — Fix webhook after deployment
+**Problem:** After every redeploy the webhook was lost — URL became empty and bot stopped responding.
+
+**Cause:** Race condition during redeploy:
+1. New process starts and sets webhook via `dp.startup.register(on_startup)`
+2. Old process terminates and calls `on_shutdown` which deletes webhook
+3. Result: webhook is empty
+
+**Step-by-step solution:**
+1. Removed `on_shutdown` — webhook doesn't need to be deleted on shutdown
+2. Moved webhook setup from aiogram lifecycle to aiohttp lifecycle:
+```python
+# Before (aiogram):
+dp.startup.register(on_startup)
+
+# After (aiohttp):
+app["bot"] = bot
+app.on_startup.append(on_startup)
+
+async def on_startup(app):
+    await app["bot"].set_webhook(WEBHOOK_URL, drop_pending_updates=True)
+```
+3. Added error handling in `on_startup`
+
+**Why aiohttp lifecycle is better:**
+- Executes earlier in the startup cycle
+- Doesn't conflict with old process termination
+- Webhook is guaranteed to be set before accepting requests
+
+**Check webhook:**
+```
+https://api.telegram.org/bot<TOKEN>/getWebhookInfo
+```
+If `url` is empty — set manually:
+```
+https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://claude-assistant-bot.onrender.com/webhook
+```
+
+---
+
+### Step 30 — Password protection for the bot
+**Why:** Bot uses paid Anthropic API — protection from unauthorized users needed. User's API key is not used (nobody will enter their own key into someone else's bot).
+
+**How it works step by step:**
+1. User sends `/start`
+2. If not authorized — bot asks for password
+3. User enters password
+4. If correct — authorization saved in `memory.json`, keyboard appears
+5. If wrong — bot asks to try again
+6. On next sessions authorization is remembered — password not needed again
+
+**Where password is stored:**
+- In `.env` locally: `BOT_PASSWORD=your_password`
+- On Render in Environment Variables: `BOT_PASSWORD=your_password`
+
+**Code changes:**
+- `bot/config.py` — added constant `BOT_PASSWORD`
+- `memory/memory_store.py` — added functions `is_authorized()` and `authorize_user()`
+- `bot/handlers.py` — `handle_message` replaced with `handle_password` with authorization check
+
+**Notes:**
+- Authorization stored in `memory.json` — resets if file is deleted
+- `os.getenv("BOT_PASSWORD", "mypassword")` — default value in case variable is not set
+- Don't forget to add `BOT_PASSWORD` to environment variables on Render!
+
+---
+
+### Step 31 — Deploy bot to Render
+**Service settings:**
+- Name: `claude-assistant-bot`
+- Region: Frankfurt
+- Branch: `master`
+- Runtime: Python
+- Build Command: `uv sync --frozen && uv cache prune --ci` (default)
+- Start Command: `uv run main.py`
+- Instance Type: Free
+
+**Environment variables:**
+```
+TELEGRAM_BOT_TOKEN=...
+ANTHROPIC_API_KEY=...
+WEBHOOK_HOST=https://claude-assistant-bot.onrender.com
+BOT_PASSWORD=...
+```
+
+**Problem during deployment:**
+Render didn't see an open port — service failed with `Port scan timeout`. Cause — slow initialization of `sentence-transformers` and `chromadb`.
+
+**Solution:**
+- Port changed to 10000 (standard for Render)
+- RAG modules moved to lazy imports inside handler functions
+
+**UptimeRobot:**
+- Free Render plan sleeps after 15 minutes without traffic
+- UptimeRobot pings `/health` every 5 minutes — service stays awake
+- Endpoint added to `main.py`:
+```python
+async def health_check(request):
+    return web.Response(text="OK")
+app.router.add_get("/health", health_check)
+```
+- URL for UptimeRobot: `https://claude-assistant-bot.onrender.com/health`
+
+---
+
+## All project steps
+
+01. - [x] Project setup in PyCharm + uv init
+02. - [x] Configure .gitignore
+03. - [x] Install dependencies
+04. - [x] Create project structure
+05. - [x] .env file
+06. - [x] bot/config.py
+07. - [x] claude/client.py
+08. - [x] claude/conversation.py
+09. - [x] bot/handlers.py
+10. - [x] main.py — entry point 
+11. - [x] First run
+12. - [x] Streaming — claude/streaming.py
+13. - [x] Tool use — tools/notes_tool.py
+14. - [x] Tool use — claude/tools.py + ask_claude_with_tools()
+15. - [x] MCP server — mcp_module/mcp_server.py + mcp_client.py
+16. - [x] RAG — rag/embeddings.py + vector_store.py + retrieval.py
+17. - [x] Agentic workflows — chains, parallel, routing
+18. - [x] Structured outputs — claude/structured.py
+19. - [x] Tests and evals — evals/test_prompts.py + benchmarks.py
+20. - [x] Long-term memory module (memory)
+21. - [x] MCP Advanced — sampling
+22. - [x] MCP Advanced — log and progress notifications
+23. - [x] MCP Advanced — roots
+24. - [x] MCP Advanced — StreamableHTTP transport
+25. - [x] Keyboard with buttons for all commands
+26. - [x] Fix HTML formatting in regular messages
+27. - [x] GitHub — create repository
+28. - [x] Prepare for deployment — switch to webhook
+29. - [x] Fix webhook after deployment
+30. - [x] Password protection for the bot
+31. - [x] Deploy bot to Render
