@@ -61,3 +61,24 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# Polling mode for local debugging
+# async def main():
+#     """Start the bot with polling for local development."""
+#     bot = Bot(
+#         token=TELEGRAM_BOT_TOKEN,
+#         default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+#     )
+#
+#     dp = Dispatcher()
+#     dp.include_router(router)
+#
+#     logger.info("Bot started in polling mode")
+#
+#     await bot.delete_webhook(drop_pending_updates=True)
+#     await dp.start_polling(bot)
+#
+#
+# if __name__ == "__main__":
+#     asyncio.run(main())
