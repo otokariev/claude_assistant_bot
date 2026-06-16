@@ -51,3 +51,48 @@ def authorize_user(user_id: int):
     memory = _load_memory()
     memory[f"auth_{user_id}"] = True
     _save_memory(memory)
+
+
+def get_current_project(user_id: int) -> str | None:
+    """Get the current project name for user. Returns None if no project set."""
+    memory = _load_memory()
+    return memory.get(f"project_{user_id}")
+
+
+def set_current_project(user_id: int, project_name: str):
+    """Set the current project for user and register it in the project list."""
+    memory = _load_memory()
+    memory[f"project_{user_id}"] = project_name
+
+    projects_key = f"projects_{user_id}"
+    projects = memory.get(projects_key, [])
+    if project_name not in projects:
+        projects.append(project_name)
+    memory[projects_key] = projects
+
+    _save_memory(memory)
+
+
+def get_projects(user_id: int) -> list[str]:
+    """Get list of all project names for user."""
+    memory = _load_memory()
+    return memory.get(f"projects_{user_id}", [])
+
+
+def delete_project(user_id: int, project_name: str) -> bool:
+    """Delete a project from the project list. Returns False if project not found or is current."""
+    memory = _load_memory()
+    projects_key = f"projects_{user_id}"
+    current = memory.get(f"project_{user_id}", "default")
+
+    if project_name == current:
+        return False  # Can't delete current project
+
+    projects = memory.get(projects_key, [])
+    if project_name not in projects:
+        return False
+
+    projects.remove(project_name)
+    memory[projects_key] = projects
+    _save_memory(memory)
+    return True

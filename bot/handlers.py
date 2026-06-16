@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import Message
+from aiogram.types import Message, BufferedInputFile
 from aiogram.filters import Command
 
 from claude.conversation import ConversationManager
@@ -18,7 +18,15 @@ from evals.test_prompts import run_prompt_tests
 from evals.benchmarks import run_benchmarks
 
 from memory.memory_manager import extract_and_save_facts, ask_claude_with_memory
-from memory.memory_store import get_facts, clear_facts
+from memory.memory_store import (
+    get_facts,
+    clear_facts,
+    is_authorized,
+    authorize_user,
+    get_current_project,
+    set_current_project,
+    get_projects,
+    delete_project)
 
 from bot.config import MULTILINGUAL_INSTRUCTION
 
@@ -27,7 +35,7 @@ from mcp_module.mcp_client_http import run_mcp_http_agent
 from bot.keyboard import get_main_keyboard
 
 from bot.config import BOT_PASSWORD
-from memory.memory_store import is_authorized, authorize_user
+
 
 router = Router()
 conversation_manager = ConversationManager()
@@ -186,8 +194,8 @@ async def handle_mcp(message: Message):
 
 @router.message(Command("upload"))
 async def handle_upload(message: Message):
-    from rag.vector_store import add_document, get_collection_count
     """Handle /upload command - add text document to vector store."""
+    from rag.vector_store import add_document, get_collection_count # lazy import
     user_text = message.text.replace("/upload", "").strip()
 
     if not user_text:
@@ -216,8 +224,8 @@ async def handle_upload(message: Message):
 
 @router.message(Command("ask_with_rag"))
 async def handle_ask_with_rag(message: Message):
-    from rag.retrieval import answer_with_rag
     """Handle /ask_with_rag command - answer question using RAG."""
+    from rag.retrieval import answer_with_rag # lazy import
     user_text = message.text.replace("/ask_with_rag", "").strip()
 
     if not user_text:
@@ -425,24 +433,35 @@ async def handle_password(message: Message):
             authorize_user(user_id)
             await message.answer(
                 "✅ Access granted!\n\n"
-                "Hello! I am your Claude assistant.\n\n"
-                "Commands:\n"
-                "/start - start\n"
-                "/help - help\n"
-                "/clear - clear conversation history",
+                "Please create a project to start:\n"
+                "/new_project your_project_name",
                 reply_markup=get_main_keyboard()
             )
         else:
             await message.answer("❌ Wrong password. Please try again:")
         return
 
-    # Authorized user - handle as regular message
-    extract_and_save_facts(user_id, message.text)
-    conversation_manager.add_message(user_id, "user", message.text)
+    # Check if project is set
+    project = get_current_project(user_id)
+    if not project:
+        await message.answer(
+            "Please create a project first:\n"
+            "/new_project your_project_name"
+        )
+        return
+
+    user_text = message.text
+
+    # Extract and save facts from user message in background
+    extract_and_save_facts(user_id, user_text)
+
+    # Add user message to conversation history
+    conversation_manager.add_message(user_id, "user", user_text)
     history = conversation_manager.get_history(user_id)
 
     await message.bot.send_chat_action(message.chat.id, "typing")
 
+    # Ask Claude with long-term memory injected
     response = ask_claude_with_memory(
         user_id=user_id,
         messages=history,
@@ -450,4 +469,151 @@ async def handle_password(message: Message):
     )
 
     conversation_manager.add_message(user_id, "assistant", response)
+
+    # Save messages to long-term vector history for /recall
+    from rag.conversation_memory import save_message
+    save_message(user_id, "user", user_text, project)
+    save_message(user_id, "assistant", response, project)
+
     await message.answer(response)
+
+
+@router.message(Command("recall"))
+async def handle_recall(message: Message):
+    """Handle /recall command - search long-term conversation history within current project."""
+    from rag.recall import answer_with_recall
+    user_text = message.text.replace("/recall", "").strip()
+
+    if not user_text:
+        await message.answer(
+            "Write a question after /recall command.\n"
+            "Example: /recall what did we do with MCP roots?"
+        )
+        return
+
+    await message.bot.send_chat_action(message.chat.id, "typing")
+
+    project = get_current_project(message.from_user.id)
+    response = answer_with_recall(message.from_user.id, user_text, project)
+    await message.answer(f"📁 <b>{project}</b>\n\n{response}", parse_mode="HTML")
+
+
+@router.message(Command("new_project"))
+async def handle_new_project(message: Message):
+    """Handle /new_project command - start a new named conversation history."""
+    user_id = message.from_user.id
+    project_name = message.text.replace("/new_project", "").strip()
+
+    if not project_name:
+        await message.answer(
+            "Write a project name after /new_project command.\n"
+            "Example: /new_project telegram_shop_bot"
+        )
+        return
+
+    set_current_project(user_id, project_name)
+    conversation_manager.clear_history(user_id)
+
+    await message.answer(
+        f"📁 Started new project: <b>{project_name}</b>\n\nConversation history cleared.",
+        parse_mode="HTML"
+    )
+
+
+@router.message(Command("switch_project"))
+async def handle_switch_project(message: Message):
+    """Handle /switch_project command - switch to an existing project."""
+    user_id = message.from_user.id
+    project_name = message.text.replace("/switch_project", "").strip()
+
+    if not project_name:
+        await message.answer(
+            "Write a project name after /switch_project command.\n"
+            "Use /projects to see available projects."
+        )
+        return
+
+    if project_name not in get_projects(user_id):
+        await message.answer(f"Project '{project_name}' not found. Use /projects to see available projects.")
+        return
+
+    set_current_project(user_id, project_name)
+    conversation_manager.clear_history(user_id)
+
+    await message.answer(
+        f"📁 Switched to project: <b>{project_name}</b>\n\n"
+        f"Conversation history cleared. Use /recall to search this project's history.",
+        parse_mode="HTML"
+    )
+
+
+@router.message(Command("projects"))
+async def handle_projects(message: Message):
+    """Handle /projects command - list all projects."""
+    user_id = message.from_user.id
+    projects = get_projects(user_id)
+    current = get_current_project(user_id)
+
+    if not projects:
+        await message.answer("📁 No projects yet. Create one with /new_project your_project_name")
+        return
+
+    lines = ["📁 <b>Your projects:</b>\n"]
+    for p in projects:
+        marker = "👉 " if p == current else "   "
+        lines.append(f"{marker}{p}")
+
+    await message.answer("\n".join(lines), parse_mode="HTML")
+
+
+@router.message(Command("export_history"))
+async def handle_export_history(message: Message):
+    """Handle /export_history command - export current project's history as a text file."""
+    from rag.conversation_memory import get_all_messages # lazy import
+    user_id = message.from_user.id
+    project = get_current_project(user_id)
+    messages = get_all_messages(user_id, project)
+
+    if not messages:
+        await message.answer("No history found for this project.")
+        return
+
+    lines = [f"Project: {project}\n"]
+    for m in messages:
+        lines.append(f"[{m['role']}]\n{m['text']}\n")
+
+    content = "\n".join(lines)
+    file = BufferedInputFile(content.encode("utf-8"), filename=f"{project}_history.txt")
+
+    await message.answer_document(file, caption=f"📁 Exported history for project: {project}")
+
+
+@router.message(Command("delete_project"))
+async def handle_delete_project(message: Message):
+    """Handle /delete_project command - delete a project and its history."""
+    from rag.conversation_memory import delete_project_history # lazy import
+    user_id = message.from_user.id
+    project_name = message.text.replace("/delete_project", "").strip()
+
+    if not project_name:
+        await message.answer(
+            "Write a project name after /delete_project command.\n"
+            "Example: /delete_project test_project"
+        )
+        return
+
+    if project_name == "default":
+        await message.answer("❌ Cannot delete the default project.")
+        return
+
+    success = delete_project(user_id, project_name)
+    if not success:
+        current = get_current_project(user_id)
+        if project_name == current:
+            await message.answer("❌ Cannot delete the current project. Switch to another project first.")
+        else:
+            await message.answer(f"❌ Project '{project_name}' not found.")
+        return
+
+    delete_project_history(user_id, project_name)
+    await message.answer(f"🗑 Project <b>{project_name}</b> and its history deleted.", parse_mode="HTML")
